@@ -28,6 +28,7 @@ from tau0_vla.data.robots.unified import UNIFIED_DIM, UNIFIED_LAYOUT, UnifiedAss
 _ADAPTER_MODULES = (
     "tau0_vla.adapters.g1",
     "tau0_vla.adapters.libero",
+    "tau0_vla.adapters.r1pro",
 )
 
 # Robot name (as recorded in a Data Spec) -> ``(module, attr)`` of its
@@ -43,6 +44,7 @@ _ROBOT_CLASS_PATHS = {
     "g1_daas_unified": ("tau0_vla.adapters.g1", "G1DaasUnified"),
     "g1_a2d_joint_unified": ("tau0_vla.adapters.g1", "G1A2dJointUnified"),
     "libero": ("tau0_vla.adapters.libero", "LiberoRobot"),
+    "r1pro": ("tau0_vla.adapters.r1pro", "R1ProRobot"),
 }
 
 
