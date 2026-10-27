@@ -20,23 +20,21 @@ from __future__ import annotations
 import os
 
 # Your robot's adapter class.
-from tau0_vla.adapters.r1pro.layout import R1ProRobot
+from tau0_vla.adapters.r1pro.layout import R1ProUnified
 from tau0_vla.data import FrameFilter, PromptSource, register_config
-from tau0_vla.data.modalities import ArmJoint, Gripper, Image, Prompt
+from tau0_vla.data.modalities import ArmJoint, Gripper, Image, Prompt,ChassisVelocity
 from tau0_vla.data.modalities.image import ColorJitter, ResizeWithPad
 
 # Set TAU0_DATA_ROOT to point at your data without editing this file.
-_DATA_ROOT = os.environ.get("TAU0_DATA_ROOT", "/data/behavior_2026")
+_DATA_ROOT = "/home/rekasius/2026-challenge-demos"
 
 # One entry per LeRobot v3.0 repo. They must share a modality schema — same
 # columns, same cameras — because one Robot Config describes all of them.
-_REPOS = [
-    f"{_DATA_ROOT}/r1pro_train",
-]
+_REPOS = [_DATA_ROOT]
 
 # Written by scripts/norm_stats/merge_stats.py, which takes this path as --out.
 # The two have to agree.
-_NORM_STATS = f"{_DATA_ROOT}/norm_stats/behavior-r1pro-unified-40d.json"
+_NORM_STATS = "/mnt/lustre/koa/scratch/rekasius/tau-0-vla/data/norm_stats/behavior-r1pro-unified-40d.json"
 
 
 # Prefixed to every sample's task text. Stating embodiment and control mode
@@ -62,25 +60,26 @@ _IMAGE_TRANSFORMS = [
 # must list the same names.
 _IMAGES = [
     Image("head", transforms=_IMAGE_TRANSFORMS),
-    Image("wrist", transforms=_IMAGE_TRANSFORMS),
+    Image("left_wrist", transforms=_IMAGE_TRANSFORMS),
+    Image("right_wrist", transforms=_IMAGE_TRANSFORMS),
 ]
 
 # Which annotation tracks decide whether a frame can be an anchor. Drop labels
 # your dataset does not carry — see DATASET_FORMAT.md.
-_FRAME_FILTER = FrameFilter(positive=["l3"], negative=["error_frame"])
+_FRAME_FILTER = FrameFilter(positive=["l3"], negative=[])
 
 _ARGS = dict(
     repo_id=_REPOS,
     images=_IMAGES,
     # Mix a fixed instruction with the dataset's own per-segment text. Use
     # PromptSource.fix(...) alone if your dataset has no l2/l3 annotations.
-    prompt_source=PromptSource.random(
-        [
-            PromptSource.fix("Complete the BEHAVIOR 2026 task."),
-            PromptSource.from_label(source="l2"),
-        ],
-        probabilities=[0.2, 0.8],
-    ),
+    # prompt_source=PromptSource.random(
+        # [
+            # PromptSource.fix("Complete the BEHAVIOR 2026 task."),
+            # PromptSource.from_label(source="l2"),
+        # ],
+        # probabilities=[0.2, 0.8],
+      prompt_source=PromptSource.fix("Turn on the radio."),
     frame_filter=_FRAME_FILTER,
     prompt=Prompt(template=_robot_prompt("R1Pro", "joint", wbc=False)),
     # action_horizon is the chunk length the model predicts. The other two are
@@ -96,13 +95,17 @@ _ARGS = dict(
 # to match it. Rename it to yours (underscores normalize to dashes when
 # save_norm_stats derives a filename from it).
 @register_config
-def behavior_r1pro() -> R1ProRobot:
-    return R1ProRobot(
+def behavior_r1pro() -> R1ProUnified:
+    return R1ProUnified(
         # A unified route scatters into the 40D layout and normalizes from
         # per_embodiment[<registry_key>], so these entries only declare which
         # modality is present — normalize="none" is correct here.
         state=[ArmJoint(normalize="none"), Gripper(normalize="none")],
-        action=[ArmJoint(normalize="none"), Gripper(normalize="none")],
+        action=[
+            ArmJoint(normalize="none"),
+            Gripper(normalize="none"),
+            ChassisVelocity(normalize="none"),   # use the class name you found in step 1
+        ],
         norm_stats_path=_NORM_STATS,
         **_ARGS,
     )

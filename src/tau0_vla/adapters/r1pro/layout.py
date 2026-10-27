@@ -24,7 +24,7 @@ from typing import Any, ClassVar, Mapping
 import numpy as np
 
 from tau0_vla.data.robots.base import RobotConfig
-
+from tau0_vla.data.robots.unified import _UnifiedMixin
 
 @dataclasses.dataclass(frozen=True)
 class R1ProObservation:
@@ -114,8 +114,9 @@ class R1ProRobot(RobotConfig):
         # video feature names in your dataset's ``meta/info.json``. The two
         # routinely differ — translating between them is what this is for.
         "images": {
-            "head": "observation.images.head",
-            "wrist": "observation.images.wrist",
+            "head": "observation.rgb.zed_link_camera_0",
+            "left_wrist": "observation.rgb.left_realsense_link_camera_0",
+            "right_wrist": "observation.rgb.right_realsense_link_camera_0"
         },
         "state": {
             # The dataset feature holding the flat state vector.
@@ -124,8 +125,8 @@ class R1ProRobot(RobotConfig):
             # these, in this order" — the order fixes the column order the model
             # sees and that ``restore_action`` returns.
             "semantic": {
-                "arm_joint": "arm_joint_positions",
-                "gripper": "gripper_positions",
+                "arm_joint": ["state/left_arm", "state/right_arm"],
+                "gripper": ["state/left_gripper", "state/right_gripper"],
             },
         },
         # Same shape, over your action feature. It does not have to mirror the
@@ -133,8 +134,9 @@ class R1ProRobot(RobotConfig):
         "action": {
             "raw": "action",
             "semantic": {
-                "arm_joint": "arm_joint_targets",
-                "gripper": "gripper_targets",
+                "arm_joint":        ["action/left_arm", "action/right_arm"],
+                "gripper":          ["action/left_gripper", "action/right_gripper"],
+                "chassis_velocity": "action/chassis_velocity",
             },
         },
     }
@@ -150,3 +152,10 @@ class R1ProRobot(RobotConfig):
     @classmethod
     def observation_from_payload(cls, payload: Mapping[str, Any]) -> R1ProObservation:
         return R1ProObservation.from_payload(payload)
+
+@dataclasses.dataclass(frozen=True)
+class R1ProUnified(_UnifiedMixin, R1ProRobot):
+    robot_name: ClassVar[str] = "r1pro_unified"
+    _unified_registry_key: ClassVar[str] = "r1pro_joint"
+
+R1PRO_UNIFIED_CLASSES: dict[str, type] = {"r1pro_unified": R1ProUnified}

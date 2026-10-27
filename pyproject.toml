@@ -49,10 +49,8 @@ dependencies = [
     "numpy>=2.0",
     "scipy>=1.16",
     "einops>=0.8",
-    "lerobot>=0.4.1,<0.5",
     "pillow>=11",
     "pyyaml>=6",
-    # Reached through lerobot in practice, but imported directly here, so they
     # are declared rather than inherited: pyarrow by the norm-stats reader,
     # torchcodec by the video decoder, torchvision by the ColorJitter transform.
     "pyarrow>=15",

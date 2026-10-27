@@ -45,6 +45,7 @@ _ROBOT_CLASS_PATHS = {
     "g1_a2d_joint_unified": ("tau0_vla.adapters.g1", "G1A2dJointUnified"),
     "libero": ("tau0_vla.adapters.libero", "LiberoRobot"),
     "r1pro": ("tau0_vla.adapters.r1pro", "R1ProRobot"),
+    "r1pro_unified": ("tau0_vla.adapters.r1pro", "R1ProUnified"),
 }
 
 

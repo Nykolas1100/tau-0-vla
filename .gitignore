@@ -177,3 +177,9 @@ outputs_profile_run/*
 configs/pretrain_final_4w/
 # local data symlinks
 /data/
+
+# Large generated outputs and local backups
+partials_output/*.npz
+*.py.bak
+*.json.bak
+overrides.txt
